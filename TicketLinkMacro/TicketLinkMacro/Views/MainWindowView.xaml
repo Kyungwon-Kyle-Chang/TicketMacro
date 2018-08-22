@@ -6,29 +6,45 @@
         xmlns:local="clr-namespace:TicketLinkMacro"
         xmlns:viewmodels="clr-namespace:TicketLinkMacro.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="424.44" Width="536.754">
+        Title="MainWindow" Height="889.903" Width="536.754">
     <Window.DataContext>
         <viewmodels:MainWindowViewModel/>
     </Window.DataContext>
 
     <DockPanel LastChildFill="True">
-        <StatusBar DockPanel.Dock="Bottom" Height="25">
-            <ProgressBar Height="15" Width="134" IsIndeterminate="{Binding IsInProgress}"></ProgressBar>
+        <StatusBar DockPanel.Dock="Bottom" Height="25" HorizontalAlignment="Stretch">
+            <ProgressBar Height="15" Width="124" IsIndeterminate="{Binding IsInProgress}"/>
+            <TextBlock Text="{Binding StatusText}"/>
         </StatusBar>
         <Grid>
-            <TextBlock HorizontalAlignment="Left" Margin="19,21,0,0" TextWrapping="Wrap" Text="ScheduledId" VerticalAlignment="Top"/>
-            <TextBox Text="{Binding ScheduledId, UpdateSourceTrigger=PropertyChanged}"
-            HorizontalAlignment="Left" Height="23" Margin="101,18,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-            <Button Command="{Binding StartCheckButton}"
-            Content="Start Check" HorizontalAlignment="Left" Height="23" Margin="250,18,0,0" VerticalAlignment="Top" Width="84"/>
-            <Button Command="{Binding StopButton}"
-            Content="Stop" HorizontalAlignment="Left" Height="23" Margin="353,18,0,0" VerticalAlignment="Top" Width="70"/>
-            <TextBlock Text="Cookie" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,61,0,0"/>
+            <!--Basic Info Input-->
+            <TextBlock HorizontalAlignment="Left" Margin="10,22,0,0" TextWrapping="Wrap" Text="Product ID" VerticalAlignment="Top"/>
+            <TextBox Text="{Binding ProductID, UpdateSourceTrigger=PropertyChanged}"
+            HorizontalAlignment="Left" Height="23" Margin="81,18,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Text="Date" Margin="253,22,0,0" TextWrapping="Wrap"/>
+            <DatePicker HorizontalAlignment="Left" Margin="291,18,0,0" VerticalAlignment="Top" SelectedDate="{Binding SelectedDate, Mode=TwoWay}"/>
+            <!--Cookie Input-->
+            <TextBlock Text="Cookie" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,53,0,0"/>
             <TextBox Text="{Binding CookieText}"
-            HorizontalAlignment="Stretch" Margin="10,82,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="67"/>
-            <TextBlock Text="Result" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,156,0,0"/>
+            HorizontalAlignment="Stretch" Margin="10,74,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="67"/>
+            <!--Start/Stop Buttons-->
+            <Button Command="{Binding StartCheckButton}"
+            Content="Start Check" HorizontalAlignment="Left" Height="23" Margin="10,146,0,0" VerticalAlignment="Top" Width="84"/>
+            <Button Command="{Binding StopButton}"
+            Content="Stop" HorizontalAlignment="Left" Height="23" Margin="105,146,0,0" VerticalAlignment="Top" Width="70"/>
+            <!--Current Status Part-->
+            <TextBlock Text="Current Status" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,216,0,0"/>
+            <TextBlock Text="Schedule ID : " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,216,132,0"/>
+            <TextBlock Text="{Binding ScheduleID}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,216,10,0"/>
             <DataGrid ItemsSource="{Binding RemainSeats}"
-            HorizontalAlignment="Stretch" Margin="10,177,10,10" VerticalAlignment="Stretch" />
+            HorizontalAlignment="Stretch" Margin="10,237,10,0" VerticalAlignment="Top" Height="131" />
+            <!--Result Part-->
+            <TextBlock Text="Result" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16,392,0,0" Height="14" Width="78" FontWeight="Bold"/>
+            <Button Command="{Binding ClearButton}" Content="Clear"
+                    Width="70" Height="23" Margin="0,388,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+            <DataGrid ItemsSource="{Binding RemainSeats}"
+            HorizontalAlignment="Stretch" Margin="10,416,10,10" VerticalAlignment="Stretch" />
+
         </Grid>
     </DockPanel>
 </Window>

@@ -8,9 +8,9 @@ namespace TicketLinkMacro.Models
 {
     public class RemainSeatData
     {
-        public int groupId { get; set; }
         public int gradeId { get; set; }
         public int blockId { get; set; }
+        public string gradeName { get; set; }
         public string blockName { get; set; }
         public int remainCnt { get; set; }
         public DateTime registerTime { get; set; }

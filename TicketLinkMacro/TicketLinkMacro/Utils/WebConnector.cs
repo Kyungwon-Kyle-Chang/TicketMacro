@@ -5,6 +5,9 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Linq;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace TicketLinkMacro.Utils
 {
@@ -20,23 +23,27 @@ namespace TicketLinkMacro.Utils
             _worker.WorkerSupportsCancellation = true;
         }
 
-        public IEnumerable<T> CallAPI<T>(string baseAddress, string requestUri, string workDescription = "")
+        public T CallAPI<T>(string baseAddress, string requestUri, string cookie = null)
         {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(baseAddress);
+            Uri uri = new Uri(baseAddress);
 
-            // JSON 형식에 대한 Accept 헤더를 추가합니다.
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
+            HttpClientHandler handler = new HttpClientHandler();
+            if (cookie != null)
+            {
+                handler.CookieContainer = new CookieContainer();
+                handler.CookieContainer.Add(uri, CookieParser.MakeCookieCollection(cookie));
+            }
 
+            HttpClient client = new HttpClient(handler);
+            client.BaseAddress = uri;
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             Messenger.Instance.Send(true, Context.PROGRESSBAR);
-            Messenger.Instance.Send(workDescription, Context.PROGRESS_DESC);
             // 모든 제품들의 목록.
             HttpResponseMessage response = client.GetAsync(requestUri).Result;  // 호출 블록킹!
             if (response.IsSuccessStatusCode)
             {
                 // 응답 본문 파싱. 블록킹!
-                var results = response.Content.ReadAsAsync<IEnumerable<T>>().Result;
+                var results = response.Content.ReadAsAsync<T>().Result;
 
                 Messenger.Instance.Send(false, Context.PROGRESSBAR);
                 Messenger.Instance.Send("", Context.PROGRESS_DESC);
@@ -47,7 +54,36 @@ namespace TicketLinkMacro.Utils
                 Messenger.Instance.Send(false, Context.PROGRESSBAR);
                 Messenger.Instance.Send("", Context.PROGRESS_DESC);
                 Messenger.Instance.Send($"{(int)response.StatusCode} ({response.ReasonPhrase})", Context.PROGRESS_DESC);
-                return null;
+                return default(T);
+            }
+        }
+
+        public ReturnType CallPostAPI<PostDataType, ReturnType>(string baseAddress, string requestUri, PostDataType postData, string cookie = null)
+        {
+            Uri uri = new Uri(baseAddress);
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (cookie != null)
+            {
+                handler.CookieContainer = new CookieContainer();
+                handler.CookieContainer.Add(uri, CookieParser.MakeCookieCollection(cookie));
+            }
+
+            HttpClient client = new HttpClient(handler);
+            client.BaseAddress = uri;
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            
+            var content = new StringContent(JsonConvert.SerializeObject(postData), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = client.PostAsync(requestUri, content).Result;  // 호출 블록킹!
+            if (response.IsSuccessStatusCode)
+            {
+                // 응답 본문 파싱. 블록킹!
+                var results = response.Content.ReadAsAsync<ReturnType>().Result;
+                return results;
+            }
+            else
+            {
+                return default(ReturnType);
             }
         }
 
@@ -80,9 +116,19 @@ namespace TicketLinkMacro.Utils
                             else
                             {
                                 Thread.Sleep(time);
+                                Messenger.Instance.Send("Processing...", Context.PROGRESS_DESC);
+
                                 HttpResponseMessage response = client.GetAsync(requestUri).Result;
-                                T result = response.Content.ReadAsAsync<T>().Result;
-                                _worker.ReportProgress(++count, result);
+
+                                try
+                                {
+                                    T result = response.Content.ReadAsAsync<T>().Result;
+                                    _worker.ReportProgress(++count, result);
+                                }
+                                catch(Exception ex)
+                                {
+                                    Messenger.Instance.Send(ex.Message, Context.PROGRESS_DESC);
+                                }
                             }
                         }
                     };
@@ -94,16 +140,16 @@ namespace TicketLinkMacro.Utils
                     {
                         if (e.Cancelled)
                         {
-                            Messenger.Instance.Send("Call API Async Cancelled.", Context.WRITE_LOG);
+                            Messenger.Instance.Send("Call API Async Cancelled.", Context.PROGRESS_DESC);
                         }
                         else if (e.Error != null)
                         {
-                            Messenger.Instance.Send("Call API Async Exception Thrown.", Context.WRITE_LOG);
+                            Messenger.Instance.Send("Call API Async Exception Thrown.", Context.PROGRESS_DESC);
                             _restart = true;
                         }
                         else
                         {
-                            Messenger.Instance.Send("Call API Async Finished.", Context.WRITE_LOG);
+                            Messenger.Instance.Send("Call API Async Finished.", Context.PROGRESS_DESC);
                         }
 
                         if (_restart)
