@@ -94,11 +94,11 @@ namespace TicketLinkMacro.ViewModels
 
 
             ScheduleID = _productRound.data[0].scheduleId;
-            string reservePage = _webConnector.CallAPI<object>(Configs.webAPI, Configs.uriGetReservePage(ScheduleID), CookieText).ToString();
-            ExtractInitData(reservePage);
+            //string reservePage = _webConnector.CallAPI<object>(Configs.webAPI, Configs.uriGetReservePage(ScheduleID), CookieText).ToString();
+            //ExtractInitData(reservePage);
             //_webConnector2 = new WebConnector();
             //_webConnector.CallAPIAsync<Blocks>(Configs.webAPI, Configs.uriGetBlocks(_productRound.data[0].scheduleId), 1000, AddRemainSeatData, CookieText);
-            //_webConnector.CallAPIAsync<Grades>(Configs.webAPI, Configs.uriGetGrades(_productRound.data[0].scheduleId), 1000, AddRemainSeatData, CookieText);
+            _webConnector.CallAPIAsync<Grades>(Configs.webAPI, Configs.uriGetGrades(_productRound.data[0].scheduleId), 1000, AddRemainSeatData, CookieText);
             IsInProgress = true;
         }
 
@@ -157,6 +157,8 @@ namespace TicketLinkMacro.ViewModels
 
         private void AddRemainSeatData(Grades grades)
         {
+            CurrentRemainSeats.Clear();
+
             if(grades == null)
             {
                 IsInProgress = false;
@@ -175,6 +177,7 @@ namespace TicketLinkMacro.ViewModels
                 data.registerTime = DateTime.Now;
 
                 RemainSeats.Add(data);
+                CurrentRemainSeats.Add(data);
             }
             Console.WriteLine(grades.result.errorMessage);
         }
