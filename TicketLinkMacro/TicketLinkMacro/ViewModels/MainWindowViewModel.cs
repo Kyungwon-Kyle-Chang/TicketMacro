@@ -189,12 +189,12 @@ namespace TicketLinkMacro.ViewModels
                 data.blockId = item.blockId;
                 data.gradeId = item.gradeId;
                 data.blockName = _meta.draw.blockInfo.Where(x => x.blockId == item.blockId.ToString()).Select(x => x.blockName).First();
-                data.gradeName = _grades.Where(x => x.gradeId == item.gradeId)?.Select(x => x.name).First();
+                data.gradeName = _grades.Where(x => x.gradeId == item.gradeId)?.Select(x => x.name).FirstOrDefault();
                 data.remainCnt = item.remainCnt;
                 data.registerTime = DateTime.Now;
 
                 string[] remainSeats = GetRemainSeatsID(data);
-                data.remainSeatsID = remainSeats[0];
+                data.remainSeatsID = remainSeats.Length > 0 ? remainSeats[0] : null;
                 for (int i = 1; i < remainSeats.Length; i++)
                 {
                     data.remainSeatsID += $", {remainSeats[i]}";
