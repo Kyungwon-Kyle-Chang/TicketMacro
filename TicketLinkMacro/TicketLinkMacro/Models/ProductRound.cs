@@ -8,11 +8,12 @@ namespace TicketLinkMacro.Models
 {
     public class ProductRound
     {
-        public string productId;
-        public string productDate;
-        public string startDatetime;
-        public string productRound;
-        public string scheduleId;
+        public string productId { get; set; }
+        public string productDate { get; set; }
+        public string startDatetime { get; set; }
+        public string startTime { get; set; }
+        public string productRound { get; set; }
+        public string scheduleId { get; set; }
     }
 
     public class ProductRounds

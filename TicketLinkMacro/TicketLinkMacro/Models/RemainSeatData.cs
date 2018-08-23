@@ -14,5 +14,6 @@ namespace TicketLinkMacro.Models
         public string blockName { get; set; }
         public int remainCnt { get; set; }
         public DateTime registerTime { get; set; }
+        public string remainSeatsID { get; set; }
     }
 }

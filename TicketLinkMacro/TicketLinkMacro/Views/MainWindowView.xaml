@@ -20,12 +20,15 @@
             <!--Basic Info Input-->
             <TextBlock HorizontalAlignment="Left" Margin="10,22,0,0" TextWrapping="Wrap" Text="Product ID" VerticalAlignment="Top"/>
             <TextBox Text="{Binding ProductID, UpdateSourceTrigger=PropertyChanged}"
-            HorizontalAlignment="Left" Height="23" Margin="81,18,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Text="Date" Margin="253,22,0,0" TextWrapping="Wrap"/>
-            <DatePicker HorizontalAlignment="Left" Margin="291,18,0,0" VerticalAlignment="Top" SelectedDate="{Binding SelectedDate, Mode=TwoWay}"/>
+            HorizontalAlignment="Left" Height="23" Margin="81,18,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="94"/>
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Text="Date" Margin="196,22,0,0" TextWrapping="Wrap"/>
+            <DatePicker HorizontalAlignment="Left" Margin="236,17,0,0" VerticalAlignment="Top" SelectedDate="{Binding SelectedDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="106"/>
+            <TextBlock Text="Time" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="371,22,0,0"/>
+            <ComboBox SelectedValue="{Binding ScheduleID, Mode=OneWayToSource}" ItemsSource="{Binding ProductRoundList}" DisplayMemberPath="startTime" SelectedValuePath="scheduleId"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Margin="409,19,0,0"/>
             <!--Cookie Input-->
             <TextBlock Text="Cookie" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,53,0,0"/>
-            <TextBox Text="{Binding CookieText}"
+            <TextBox Text="{Binding CookieText, UpdateSourceTrigger=PropertyChanged}"
             HorizontalAlignment="Stretch" Margin="10,74,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="67"/>
             <!--Start/Stop Buttons-->
             <Button Command="{Binding StartCheckButton}"
@@ -34,7 +37,7 @@
             Content="Stop" HorizontalAlignment="Left" Height="23" Margin="105,146,0,0" VerticalAlignment="Top" Width="70"/>
             <!--Current Status Part-->
             <TextBlock Text="Current Status" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,216,0,0"/>
-            <TextBlock Text="Schedule ID : " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,216,132,0"/>
+            <TextBlock Text="Schedule ID : " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,216,98,0"/>
             <TextBlock Text="{Binding ScheduleID}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,216,10,0"/>
             <DataGrid ItemsSource="{Binding CurrentRemainSeats}"
             HorizontalAlignment="Stretch" Margin="10,237,10,0" VerticalAlignment="Top" Height="131" />
@@ -44,7 +47,6 @@
                     Width="70" Height="23" Margin="0,388,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
             <DataGrid ItemsSource="{Binding RemainSeats}"
             HorizontalAlignment="Stretch" Margin="10,416,10,10" VerticalAlignment="Stretch" />
-
         </Grid>
     </DockPanel>
 </Window>

@@ -37,24 +37,46 @@ namespace TicketLinkMacro.Utils
             HttpClient client = new HttpClient(handler);
             client.BaseAddress = uri;
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            Messenger.Instance.Send(true, Context.PROGRESSBAR);
-            // 모든 제품들의 목록.
-            HttpResponseMessage response = client.GetAsync(requestUri).Result;  // 호출 블록킹!
+
+            HttpResponseMessage response = client.GetAsync(requestUri).Result; 
             if (response.IsSuccessStatusCode)
             {
-                // 응답 본문 파싱. 블록킹!
                 var results = response.Content.ReadAsAsync<T>().Result;
-
-                Messenger.Instance.Send(false, Context.PROGRESSBAR);
                 Messenger.Instance.Send("", Context.PROGRESS_DESC);
                 return results;
             }
             else
             {
-                Messenger.Instance.Send(false, Context.PROGRESSBAR);
-                Messenger.Instance.Send("", Context.PROGRESS_DESC);
                 Messenger.Instance.Send($"{(int)response.StatusCode} ({response.ReasonPhrase})", Context.PROGRESS_DESC);
                 return default(T);
+            }
+        }
+
+        public string CallHtmlAPI(string baseAddress, string requestUri, string cookie = null)
+        {
+            Uri uri = new Uri(baseAddress);
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (cookie != null)
+            {
+                handler.CookieContainer = new CookieContainer();
+                handler.CookieContainer.Add(uri, CookieParser.MakeCookieCollection(cookie));
+            }
+
+            HttpClient client = new HttpClient(handler);
+            client.BaseAddress = uri;
+            
+            HttpResponseMessage response = client.GetAsync(requestUri).Result;
+            if (response.IsSuccessStatusCode)
+            {
+                var results = response.Content.ReadAsStringAsync().Result;
+                Messenger.Instance.Send("", Context.PROGRESS_DESC);
+                return results;
+            }
+            else
+            {
+                Messenger.Instance.Send($"{(int)response.StatusCode} ({response.ReasonPhrase})", Context.PROGRESS_DESC);
+                return null;
             }
         }
 
@@ -73,7 +95,7 @@ namespace TicketLinkMacro.Utils
             client.BaseAddress = uri;
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             
-            var content = new StringContent(JsonConvert.SerializeObject(postData), Encoding.UTF8, "application/json");
+            var content = new StringContent(typeof(PostDataType) != typeof(string) ? JsonConvert.SerializeObject(postData) : postData.ToString(), Encoding.UTF8, "application/json");
             HttpResponseMessage response = client.PostAsync(requestUri, content).Result;  // 호출 블록킹!
             if (response.IsSuccessStatusCode)
             {
