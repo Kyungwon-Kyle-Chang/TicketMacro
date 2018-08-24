@@ -134,6 +134,7 @@ namespace TicketLinkMacro.ViewModels
             if (!ExtractInitData(reservePage))
             {
                 Process.Start("chrome.exe", Configs.webAPI + Configs.uriGetReservePage(ScheduleID));
+                return;
             }
 
             Blocks blocks = _webConnectorTemporary.CallAPI<Blocks>(Configs.webAPI, Configs.uriGetBlocks(ScheduleID), CookieText);
