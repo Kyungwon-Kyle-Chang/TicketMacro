@@ -142,7 +142,7 @@ namespace TicketLinkMacro.ViewModels
 
         private void StopExecute(object obj)
         {
-            _webConnectorContinuous.CancelAsyncCall();
+            _webConnectorContinuous?.CancelAsyncCall();
         }
 
         private void ClearExecute(object obj)
