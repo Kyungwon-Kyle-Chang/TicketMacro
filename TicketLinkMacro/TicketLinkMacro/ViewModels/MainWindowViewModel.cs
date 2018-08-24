@@ -6,6 +6,7 @@ using System;
 using TicketLinkMacro.Utils;
 using Newtonsoft.Json;
 using TicketLinkMacro.Test;
+using System.Diagnostics;
 
 namespace TicketLinkMacro.ViewModels
 {
@@ -28,7 +29,19 @@ namespace TicketLinkMacro.ViewModels
             }
         }
 
-        public ObservableCollection<ProductRound> ProductRoundList { get; set; }
+        private string _qty = "";
+        public string Qty
+        {
+            get { return _qty; }
+            set { SetProperty(ref _qty, value); }
+        }
+
+        private bool _autoPopup = false;
+        public bool AutoPopup
+        {
+            get { return _autoPopup; }
+            set { SetProperty(ref _autoPopup, value); }
+        }
 
         private string _cookieText;
         public string CookieText
@@ -61,6 +74,8 @@ namespace TicketLinkMacro.ViewModels
         public CommandBase StartCheckButton { get; private set; }
         public CommandBase StopButton { get; private set; }
         public CommandBase ClearButton { get; private set; }
+        
+        public ObservableCollection<ProductRound> ProductRoundList { get; set; }
         public ObservableCollection<RemainSeatData> CurrentRemainSeats { get; set; }
         public ObservableCollection<RemainSeatData> RemainSeats { get; set; }
 
@@ -74,10 +89,10 @@ namespace TicketLinkMacro.ViewModels
 
         public MainWindowViewModel()
         {
-            ProductRoundList = new ObservableCollection<ProductRound>();
             StartCheckButton = new CommandBase(StartCheckExecute, StartCheckCanExecute);
             StopButton = new CommandBase(StopExecute);
             ClearButton = new CommandBase(ClearExecute);
+            ProductRoundList = new ObservableCollection<ProductRound>();
             CurrentRemainSeats = new ObservableCollection<RemainSeatData>();
             RemainSeats = new ObservableCollection<RemainSeatData>();
             _webConnectorTemporary = new WebConnector();
@@ -104,7 +119,7 @@ namespace TicketLinkMacro.ViewModels
                 return;
             }
 
-
+            ProductRoundList.Clear();
             foreach (ProductRound item in _productRound.data)
             {
                 ProductRoundList.Add(item);
@@ -116,7 +131,10 @@ namespace TicketLinkMacro.ViewModels
             _webConnectorContinuous = new WebConnector();
             
             string reservePage = _webConnectorTemporary.CallHtmlAPI(Configs.webAPI, Configs.uriGetReservePage(ScheduleID), CookieText).ToString();
-            ExtractInitData(reservePage);
+            if (!ExtractInitData(reservePage))
+            {
+                Process.Start("chrome.exe", Configs.webAPI + Configs.uriGetReservePage(ScheduleID));
+            }
 
             Blocks blocks = _webConnectorTemporary.CallAPI<Blocks>(Configs.webAPI, Configs.uriGetBlocks(ScheduleID), CookieText);
             if(blocks.data.Length > 0)
@@ -137,7 +155,8 @@ namespace TicketLinkMacro.ViewModels
                 && RegexManager.IsUnsignedInt(ProductID)
                 && RegexManager.IsNotBlank(ProductID)
                 && ScheduleID != null
-                && CookieText != null;
+                && CookieText != null
+                && RegexManager.IsUnsignedInt(Qty);
         }
 
         private void StopExecute(object obj)
@@ -150,14 +169,26 @@ namespace TicketLinkMacro.ViewModels
             RemainSeats.Clear();
         }
 
-        private void ExtractInitData(string s)
+        private void TicketBuyExecute(object obj)
+        {
+            var info = SetPreOccupancyInfo(int.Parse(Qty), (RemainSeatData)obj);
+
+            ReserveKey reserveKey = _webConnectorTemporary.CallPostAPI<PreOccupancy, ReserveKey>(Configs.webAPI, Configs.uriGetPreoccupancy(ScheduleID), info, CookieText);
+            Process.Start("chrome.exe", Configs.webAPI + Configs.uriGetPurchasePage(reserveKey.data));
+        }
+
+        private bool ExtractInitData(string s)
         {
             string[] delim = { "var initData = {};", "initData.globalLocale ="};
             string[] delim2 = { "initData." };
             string[] delim3 = { " = "};
             char[] delim4 = { ' ', ';', '\n' };
 
-            string s2 = s.Split(delim, StringSplitOptions.None)[1];
+            string[] s1 = s.Split(delim, StringSplitOptions.None);
+            if(s1.Length < 3)
+                return false;
+          
+            string s2 = s1[1];
             string[] datum = s2.Split(delim2, StringSplitOptions.RemoveEmptyEntries);
             
             string product = datum[1].Split(delim3, StringSplitOptions.None)[1];
@@ -171,6 +202,8 @@ namespace TicketLinkMacro.ViewModels
             _product = JsonConvert.DeserializeObject<Product>(product);
             _meta = JsonConvert.DeserializeObject<Meta>(meta);
             _grades = JsonConvert.DeserializeObject<Grade[]>(grade);
+
+            return true;
         }
 
         private void AddRemainSeatData(Blocks blocks)
@@ -186,7 +219,7 @@ namespace TicketLinkMacro.ViewModels
             var remainBlocks = blocks.data.Where(block => block.remainCnt > 0);
             foreach(Block item in remainBlocks)
             {
-                RemainSeatData data = new RemainSeatData();
+                RemainSeatData data = new RemainSeatData(TicketBuyExecute);
                 data.blockId = item.blockId;
                 data.gradeId = item.gradeId;
                 data.blockName = _meta.draw.blockInfo.Where(x => x.blockId == item.blockId.ToString()).Select(x => x.blockName).First();
@@ -203,6 +236,13 @@ namespace TicketLinkMacro.ViewModels
 
                 RemainSeats.Add(data);
                 CurrentRemainSeats.Add(data);
+
+                if(AutoPopup && item.remainCnt >= int.Parse(Qty))
+                {
+                    TicketBuyExecute(data);
+                    StopExecute(null);
+                    return;
+                }
             }
             Console.WriteLine(blocks.result.errorMessage);
         }
@@ -220,7 +260,7 @@ namespace TicketLinkMacro.ViewModels
             var remainGrades = grades.data.Where(grade => grade.remainCnt > 0);
             foreach (Grade item in remainGrades)
             {
-                RemainSeatData data = new RemainSeatData();
+                RemainSeatData data = new RemainSeatData(TicketBuyExecute);
                 data.gradeId = item.gradeId;
                 data.remainCnt = item.remainCnt;
                 data.gradeName = item.name;
@@ -235,6 +275,13 @@ namespace TicketLinkMacro.ViewModels
                 
                 RemainSeats.Add(data);
                 CurrentRemainSeats.Add(data);
+
+                if (AutoPopup && item.remainCnt >= int.Parse(Qty))
+                {
+                    TicketBuyExecute(data);
+                    StopExecute(null);
+                    return;
+                }
             }
             Console.WriteLine(grades.result.errorMessage);
         }
@@ -301,12 +348,14 @@ namespace TicketLinkMacro.ViewModels
                 }
             }
 
+            remainSeatsInfo.Sort((x, y) => { return int.Parse(x.logicalSeatid) - int.Parse(y.logicalSeatid); });
             PreOccupancy.Seat[] selectedSeats = new PreOccupancy.Seat[count];
             for(int i=0; i<count; i++)
             {
+                selectedSeats[i] = new PreOccupancy.Seat();
                 selectedSeats[i].allotmentCode = remainSeatsInfo[i].allotmentCode;
                 selectedSeats[i].area = remainSeatsInfo[i].area;
-                selectedSeats[i].blockId = int.Parse(remainSeatsInfo[i].blockId);
+                selectedSeats[i].blockId = remainSeatsInfo[i].blockId != null ? int.Parse(remainSeatsInfo[i].blockId) : 0;
                 selectedSeats[i].logicalSeatId = uint.Parse(remainSeatsInfo[i].logicalSeatid);
                 selectedSeats[i].orderNum = int.Parse(remainSeatsInfo[i].orderNum);
                 selectedSeats[i].productGradeId = int.Parse(remainSeatsInfo[i].gradeId);

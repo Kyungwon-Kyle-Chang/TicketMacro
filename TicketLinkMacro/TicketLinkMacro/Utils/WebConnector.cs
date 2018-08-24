@@ -109,6 +109,34 @@ namespace TicketLinkMacro.Utils
             }
         }
 
+        public string CallPostHtmlAPI<PostDataType>(string baseAddress, string requestUri, PostDataType postData, string cookie = null)
+        {
+            Uri uri = new Uri(baseAddress);
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (cookie != null)
+            {
+                handler.CookieContainer = new CookieContainer();
+                handler.CookieContainer.Add(uri, CookieParser.MakeCookieCollection(cookie));
+            }
+
+            HttpClient client = new HttpClient(handler);
+            client.BaseAddress = uri;
+
+            var content = new StringContent(typeof(PostDataType) != typeof(string) ? JsonConvert.SerializeObject(postData) : postData.ToString(), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = client.PostAsync(requestUri, content).Result;  // 호출 블록킹!
+            if (response.IsSuccessStatusCode)
+            {
+                // 응답 본문 파싱. 블록킹!
+                var results = response.Content.ReadAsStringAsync().Result;
+                return results;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public void CallAPIAsync<T>(string baseAddress, string requestUri, int time, Action<T> progressChanged, string cookie = null)
         {
             Uri uri = new Uri(baseAddress);
@@ -190,10 +218,17 @@ namespace TicketLinkMacro.Utils
 
         public void CancelAsyncCall()
         {
-            if (_worker.IsBusy)
+            try
             {
-                _worker.ReportProgress(100, null);
-                _worker.CancelAsync();
+                if (_worker.IsBusy)
+                {
+                    _worker.ReportProgress(100, null);
+                    _worker.CancelAsync();
+                }
+            }
+            catch(InvalidOperationException e)
+            {
+                Messenger.Instance.Send(e.Message, Context.PROGRESS_DESC);
             }
         }
     }

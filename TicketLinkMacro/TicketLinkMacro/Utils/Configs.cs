@@ -19,5 +19,6 @@ namespace TicketLinkMacro.Utils
         public static string uriGetAllSeatsInArea(string scheduledId) { return $"api/V2/plan/{scheduledId}/seat-all/canverse/area"; }
         public static string uriGetSoldoutBlocks(string scheduledId) { return $"api/V2/plan/{scheduledId}/seat-soldout/block"; }
         public static string uriGetSoldoutAreas(string scheduledId) { return $"api/V2/plan/{scheduledId}/seat-soldout/area"; }
+        public static string uriGetPurchasePage(string reserveKey) { return $"reserve/key/{reserveKey}/price"; }
     }
 }

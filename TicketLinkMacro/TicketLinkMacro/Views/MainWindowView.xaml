@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TicketLinkMacro"
         xmlns:viewmodels="clr-namespace:TicketLinkMacro.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="889.903" Width="536.754">
+        Title="MainWindow" Height="889.903" Width="638.754">
     <Window.DataContext>
         <viewmodels:MainWindowViewModel/>
     </Window.DataContext>
@@ -26,27 +26,59 @@
             <TextBlock Text="Time" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="371,22,0,0"/>
             <ComboBox SelectedValue="{Binding ScheduleID, Mode=OneWayToSource}" ItemsSource="{Binding ProductRoundList}" DisplayMemberPath="startTime" SelectedValuePath="scheduleId"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Margin="409,19,0,0"/>
+            <TextBlock Text="Qty" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,52,0,0"/>
+            <TextBox Text="{Binding Qty}"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Width="94" Margin="81,52,0,0"/>
+            <CheckBox IsChecked="{Binding AutoPopup, UpdateSourceTrigger=PropertyChanged, Mode=OneWayToSource}"
+                Content="Auto Popup" HorizontalAlignment="Left" VerticalAlignment="Top" Height="22" Margin="196,55,0,0" Width="84"/>
             <!--Cookie Input-->
-            <TextBlock Text="Cookie" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,53,0,0"/>
+            <TextBlock Text="Cookie" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,93,0,0"/>
             <TextBox Text="{Binding CookieText, UpdateSourceTrigger=PropertyChanged}"
-            HorizontalAlignment="Stretch" Margin="10,74,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="67"/>
+            HorizontalAlignment="Stretch" Margin="10,114,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="67"/>
             <!--Start/Stop Buttons-->
             <Button Command="{Binding StartCheckButton}"
-            Content="Start Check" HorizontalAlignment="Left" Height="23" Margin="10,146,0,0" VerticalAlignment="Top" Width="84"/>
+            Content="Start Check" HorizontalAlignment="Left" Height="23" Margin="10,190,0,0" VerticalAlignment="Top" Width="84"/>
             <Button Command="{Binding StopButton}"
-            Content="Stop" HorizontalAlignment="Left" Height="23" Margin="105,146,0,0" VerticalAlignment="Top" Width="70"/>
+            Content="Stop" HorizontalAlignment="Left" Height="23" Margin="105,190,0,0" VerticalAlignment="Top" Width="70"/>
             <!--Current Status Part-->
-            <TextBlock Text="Current Status" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,216,0,0"/>
-            <TextBlock Text="Schedule ID : " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,216,98,0"/>
-            <TextBlock Text="{Binding ScheduleID}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,216,10,0"/>
-            <DataGrid ItemsSource="{Binding CurrentRemainSeats}"
-            HorizontalAlignment="Stretch" Margin="10,237,10,0" VerticalAlignment="Top" Height="131" />
+            <TextBlock Text="Current Status" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,242,0,0"/>
+            <TextBlock Text="Schedule ID : " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,242,98,0"/>
+            <TextBlock Text="{Binding ScheduleID}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,242,10,0"/>
+            <DataGrid ItemsSource="{Binding CurrentRemainSeats}" AutoGenerateColumns="False"
+            HorizontalAlignment="Stretch" Margin="10,263,10,0" VerticalAlignment="Top" Height="131">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Grade ID" Binding="{Binding gradeId}"/>
+                    <DataGridTextColumn Header="Block ID" Binding="{Binding blockId}"/>
+                    <DataGridTextColumn Header="Grade Name" Binding="{Binding gradeName}"/>
+                    <DataGridTextColumn Header="Block Name" Binding="{Binding blockName}"/>
+                    <DataGridTextColumn Header="Remain Seats" Binding="{Binding remainCnt}"/>
+                    <DataGridTextColumn Header="Register Time" Binding="{Binding registerTime}"/>
+                    <DataGridTemplateColumn Header="Buy Button">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Width="80" Name="BuyButton" Command="{Binding TicketBuyButton}" CommandParameter="{Binding Path=.}">Buy</Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
             <!--Result Part-->
-            <TextBlock Text="Result" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16,392,0,0" Height="14" Width="78" FontWeight="Bold"/>
+            <TextBlock Text="Result" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,418,0,0" Height="14" Width="78" FontWeight="Bold"/>
             <Button Command="{Binding ClearButton}" Content="Clear"
-                    Width="70" Height="23" Margin="0,388,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-            <DataGrid ItemsSource="{Binding RemainSeats}"
-            HorizontalAlignment="Stretch" Margin="10,416,10,10" VerticalAlignment="Stretch" />
+                    Width="70" Height="23" Margin="0,414,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+            <DataGrid ItemsSource="{Binding RemainSeats}" AutoGenerateColumns="False"
+            HorizontalAlignment="Stretch" Margin="10,442,10,10" VerticalAlignment="Stretch">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Grade ID" Binding="{Binding gradeId}"/>
+                    <DataGridTextColumn Header="Block ID" Binding="{Binding blockId}"/>
+                    <DataGridTextColumn Header="Grade Name" Binding="{Binding gradeName}"/>
+                    <DataGridTextColumn Header="Block Name" Binding="{Binding blockName}"/>
+                    <DataGridTextColumn Header="Remain Seats" Binding="{Binding remainCnt}"/>
+                    <DataGridTextColumn Header="Register Time" Binding="{Binding registerTime}"/>
+                </DataGrid.Columns>
+
+            </DataGrid>
+
         </Grid>
     </DockPanel>
 </Window>

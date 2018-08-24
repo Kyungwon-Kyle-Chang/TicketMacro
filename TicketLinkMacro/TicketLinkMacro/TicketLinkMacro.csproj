@@ -82,6 +82,7 @@
     <Compile Include="Models\ProductInfo.cs" />
     <Compile Include="Models\ProductRound.cs" />
     <Compile Include="Models\RemainSeatData.cs" />
+    <Compile Include="Models\ReserveKey.cs" />
     <Compile Include="Models\SoldoutSeats.cs" />
     <Compile Include="Test\Test_SoldoutSeats.cs" />
     <Compile Include="Utils\BindableBase.cs" />
