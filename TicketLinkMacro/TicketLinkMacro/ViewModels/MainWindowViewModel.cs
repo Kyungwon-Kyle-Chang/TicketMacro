@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System;
 using TicketLinkMacro.Utils;
 using Newtonsoft.Json;
+using TicketLinkMacro.Test;
 
 namespace TicketLinkMacro.ViewModels
 {
@@ -231,35 +232,98 @@ namespace TicketLinkMacro.ViewModels
                 {
                     data.remainSeatsID += $", {remainSeats[i]}";
                 }
-
+                
                 RemainSeats.Add(data);
                 CurrentRemainSeats.Add(data);
             }
             Console.WriteLine(grades.result.errorMessage);
         }
 
-        private string[] GetRemainSeatsID(RemainSeatData data)
+        private SoldoutSeats GetSoldoutSeats(int blockId)
         {
-            List<string> result = new List<string>();
-            SoldoutSeats soldouts = new SoldoutSeats();
+            SoldoutSeats result;
 
-            if(data.blockId == 0)
+            if (blockId == 0)
             {
-                VirtualVector2<string>[] postData =
-                    new VirtualVector2<string>[] { new VirtualVector2<string>("0", "0"),
-                                                new VirtualVector2<string>("0", "1"),
-                                                new VirtualVector2<string>("1", "0"),
-                                                new VirtualVector2<string>("1", "1") };
-                soldouts = _webConnectorTemporary.CallPostAPI<VirtualVector2<string>[], SoldoutSeats>(Configs.webAPI, Configs.uriGetSoldoutAreas(ScheduleID), postData, CookieText);
+                VirtualVector2<string>[] postData = _meta.draw.physical.pagingInfo;
+                result = _webConnectorTemporary.CallPostAPI<VirtualVector2<string>[], SoldoutSeats>(Configs.webAPI, Configs.uriGetSoldoutAreas(ScheduleID), postData, CookieText);
             }
             else
             {
-                soldouts = _webConnectorTemporary.CallPostAPI<string, SoldoutSeats>(Configs.webAPI, Configs.uriGetSoldoutBlocks(ScheduleID), $"[{data.blockId}]", CookieText);
+                result = _webConnectorTemporary.CallPostAPI<string, SoldoutSeats>(Configs.webAPI, Configs.uriGetSoldoutBlocks(ScheduleID), $"[{blockId}]", CookieText);
             }
 
-            result.AddRange(soldouts.SeatStatus.Where(x => x.sold == false).Select(x => x.id));
+            return result;
+        }
+
+        private AllSeatData GetAllSeatData(int blockId)
+        {
+            AllSeatData result;
+
+            if(blockId == 0)
+            {
+                VirtualVector2<string>[] postData = _meta.draw.physical.pagingInfo;
+                result = _webConnectorTemporary.CallPostAPI<VirtualVector2<string>[], AllSeatData>(Configs.webAPI, Configs.uriGetAllSeatsInArea(ScheduleID), postData, CookieText);
+            }
+            else
+            {
+                result = _webConnectorTemporary.CallPostAPI<string, AllSeatData>(Configs.webAPI, Configs.uriGetAllSeatsInBlock(ScheduleID), $"[{blockId}]", CookieText);
+            }
+
+            return result;
+        }
+
+        private string[] GetRemainSeatsID(RemainSeatData data)
+        {
+            List<string> result = new List<string>();
+
+            SoldoutSeats soldouts = GetSoldoutSeats(data.blockId);
+            result.AddRange(soldouts.data.Where(x => x.Value == false).Select(x => x.Key));
 
             return result.ToArray();
+        }
+
+        private PreOccupancy SetPreOccupancyInfo(int count, RemainSeatData data)
+        {
+            string[] remainSeatIds = data.remainSeatsID.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+            if (remainSeatIds.Length < count)
+                return null;
+
+            AllSeatData allSeatData = GetAllSeatData(data.blockId);
+            List<AllSeatData.Data.Seat> remainSeatsInfo = new List<AllSeatData.Data.Seat>();
+            for (int i=0; i<remainSeatIds.Length; i++)
+            {
+                foreach(AllSeatData.Data.Seat[] seats in allSeatData.data.able.Values)
+                {
+                    var seat = seats.Where(x => string.Equals(x.logicalSeatid, remainSeatIds[i]));
+                    if (seat.Count() > 0)
+                        remainSeatsInfo.Add(seat.First());
+                }
+            }
+
+            PreOccupancy.Seat[] selectedSeats = new PreOccupancy.Seat[count];
+            for(int i=0; i<count; i++)
+            {
+                selectedSeats[i].allotmentCode = remainSeatsInfo[i].allotmentCode;
+                selectedSeats[i].area = remainSeatsInfo[i].area;
+                selectedSeats[i].blockId = int.Parse(remainSeatsInfo[i].blockId);
+                selectedSeats[i].logicalSeatId = uint.Parse(remainSeatsInfo[i].logicalSeatid);
+                selectedSeats[i].orderNum = int.Parse(remainSeatsInfo[i].orderNum);
+                selectedSeats[i].productGradeId = int.Parse(remainSeatsInfo[i].gradeId);
+                selectedSeats[i].productGradeName = data.gradeName;
+                selectedSeats[i].seatAttribute = remainSeatsInfo[i].mapInfo;
+                selectedSeats[i].sortSeatAttribute = remainSeatsInfo[i].sortMapInfo;
+            }
+
+            PreOccupancy result = new PreOccupancy();
+            result.code = remainSeatsInfo.First().allotmentCode;
+            result.memberNo = 0;
+            result.scheduleId = uint.Parse(ScheduleID);
+            result.seats = selectedSeats;
+            result.totalCnt = selectedSeats.Length;
+            result.zones = new string[0];
+
+            return result;
         }
     }
 }

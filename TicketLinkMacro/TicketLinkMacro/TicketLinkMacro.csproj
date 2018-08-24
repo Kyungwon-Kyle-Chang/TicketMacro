@@ -72,6 +72,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Enumerators.cs" />
+    <Compile Include="Models\AllSeatData.cs" />
     <Compile Include="Models\Blocks.cs" />
     <Compile Include="Models\CommunicationResult.cs" />
     <Compile Include="Models\Grades.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Models\ProductRound.cs" />
     <Compile Include="Models\RemainSeatData.cs" />
     <Compile Include="Models\SoldoutSeats.cs" />
+    <Compile Include="Test\Test_SoldoutSeats.cs" />
     <Compile Include="Utils\BindableBase.cs" />
     <Compile Include="Utils\CommandBase.cs" />
     <Compile Include="Utils\Configs.cs" />

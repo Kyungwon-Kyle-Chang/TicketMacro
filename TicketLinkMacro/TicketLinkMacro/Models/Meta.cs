@@ -38,7 +38,7 @@ namespace TicketLinkMacro.Models
                 public BGInfo bgInfo;
                 public BGInfo blockBgInfo;
                 public SeatMark seatMark;
-                public VirtualVector2<int>[] pagingInfo;
+                public VirtualVector2<string>[] pagingInfo;
 
                 public class PhysicalPlan
                 {
