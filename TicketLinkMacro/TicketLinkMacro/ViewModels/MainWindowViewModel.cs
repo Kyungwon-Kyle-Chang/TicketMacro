@@ -57,6 +57,20 @@ namespace TicketLinkMacro.ViewModels
             set { SetProperty(ref _scheduleID, value); }
         }
 
+        private string _targetGrade = "0";
+        public string TargetGrade
+        {
+            get { return _targetGrade; }
+            set { SetProperty(ref _targetGrade, value); }
+        }
+
+        private string _targetBlock = "0";
+        public string TargetBlock
+        {
+            get { return _targetBlock; }
+            set { SetProperty(ref _targetBlock, value); }
+        }
+
         private bool _isInProgress = false;
         public bool IsInProgress
         {
@@ -77,6 +91,8 @@ namespace TicketLinkMacro.ViewModels
         
         public ObservableCollection<ProductRound> ProductRoundList { get; set; }
         public ObservableCollection<RemainSeatData> CurrentRemainSeats { get; set; }
+        public ObservableCollection<Grade> GradeList { get; set; }
+        public ObservableCollection<Meta.Draw.BlockInfo> BlockList { get; set; }
         public ObservableCollection<RemainSeatData> RemainSeats { get; set; }
 
         private ProductRounds _productRound;
@@ -94,6 +110,8 @@ namespace TicketLinkMacro.ViewModels
             ClearButton = new CommandBase(ClearExecute);
             ProductRoundList = new ObservableCollection<ProductRound>();
             CurrentRemainSeats = new ObservableCollection<RemainSeatData>();
+            GradeList = new ObservableCollection<Grade>();
+            BlockList = new ObservableCollection<Meta.Draw.BlockInfo>();
             RemainSeats = new ObservableCollection<RemainSeatData>();
             _webConnectorTemporary = new WebConnector();
 
@@ -130,7 +148,7 @@ namespace TicketLinkMacro.ViewModels
         {
             _webConnectorContinuous = new WebConnector();
             
-            string reservePage = _webConnectorTemporary.CallHtmlAPI(Configs.webAPI, Configs.uriGetReservePage(ScheduleID), CookieText).ToString();
+            string reservePage = _webConnectorTemporary.CallHtmlAPI(Configs.webAPI, Configs.uriGetReservePage(ScheduleID), CookieText);
             if (!ExtractInitData(reservePage))
             {
                 Process.Start("chrome.exe", Configs.webAPI + Configs.uriGetReservePage(ScheduleID));
@@ -204,6 +222,23 @@ namespace TicketLinkMacro.ViewModels
             _meta = JsonConvert.DeserializeObject<Meta>(meta);
             _grades = JsonConvert.DeserializeObject<Grade[]>(grade);
 
+            GradeList.Clear();
+            BlockList.Clear();
+
+            Grade defaultGrade = new Grade();
+            defaultGrade.gradeId = 0;
+            defaultGrade.name = "전체";
+            Meta.Draw.BlockInfo defaultBlock = new Meta.Draw.BlockInfo();
+            defaultBlock.blockId = 0;
+            defaultBlock.blockName = "전체";
+            GradeList.Add(defaultGrade);
+            BlockList.Add(defaultBlock);
+
+            foreach (Grade item in _grades)
+                GradeList.Add(item);
+            foreach(Meta.Draw.BlockInfo item in _meta.draw.blockInfo)
+                BlockList.Add(item);
+
             return true;
         }
 
@@ -218,12 +253,14 @@ namespace TicketLinkMacro.ViewModels
             }
 
             var remainBlocks = blocks.data.Where(block => block.remainCnt > 0);
+            remainBlocks = TargetBlock == "0" ? remainBlocks : remainBlocks.Where(x => x.blockId.ToString() == TargetBlock);
+            remainBlocks = TargetGrade == "0" ? remainBlocks : remainBlocks.Where(x => x.gradeId.ToString() == TargetGrade);
             foreach(Block item in remainBlocks)
             {
                 RemainSeatData data = new RemainSeatData(TicketBuyExecute);
                 data.blockId = item.blockId;
                 data.gradeId = item.gradeId;
-                data.blockName = _meta.draw.blockInfo.Where(x => x.blockId == item.blockId.ToString()).Select(x => x.blockName).First();
+                data.blockName = _meta.draw.blockInfo.Where(x => x.blockId == item.blockId).Select(x => x.blockName).First();
                 data.gradeName = _grades.Where(x => x.gradeId == item.gradeId)?.Select(x => x.name).FirstOrDefault();
                 data.remainCnt = item.remainCnt;
                 data.registerTime = DateTime.Now;
@@ -259,6 +296,7 @@ namespace TicketLinkMacro.ViewModels
             }
 
             var remainGrades = grades.data.Where(grade => grade.remainCnt > 0);
+            remainGrades = TargetGrade == "0" ? remainGrades : remainGrades.Where(x => x.gradeId.ToString() == TargetGrade);
             foreach (Grade item in remainGrades)
             {
                 RemainSeatData data = new RemainSeatData(TicketBuyExecute);

@@ -8,18 +8,18 @@
 
     public class Grade
     {
-        public string agreeContext;
-        public bool auto;
-        public string color;
-        public bool direct;
-        public int gradeId;
-        public int groupSeatCount;
-        public string name;
-        public string notice;
-        public bool preReserveSale;
-        public int price;
-        public int priority;
-        public int remainCnt;
-        public bool restriction;
+        public string agreeContext { get; set; }
+        public bool auto { get; set; }
+        public string color { get; set; }
+        public bool direct { get; set; }
+        public int gradeId { get; set; }
+        public int groupSeatCount { get; set; }
+        public string name { get; set; }
+        public string notice { get; set; }
+        public bool preReserveSale { get; set; }
+        public int price { get; set; }
+        public int priority { get; set; }
+        public int remainCnt { get; set; }
+        public bool restriction { get; set; }
     }
 }

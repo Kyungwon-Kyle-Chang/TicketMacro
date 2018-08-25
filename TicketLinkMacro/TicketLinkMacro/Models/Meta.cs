@@ -77,8 +77,8 @@ namespace TicketLinkMacro.Models
             }
             public class BlockInfo
             {
-                public string blockId;
-                public string blockName;
+                public int blockId { get; set; }
+                public string blockName { get; set; }
                 public Vector2[] cornerPoints;
                 public Vector2 linkedPoint;
                 public Vector2 vectorPoint;

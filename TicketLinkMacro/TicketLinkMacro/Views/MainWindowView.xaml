@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TicketLinkMacro"
         xmlns:viewmodels="clr-namespace:TicketLinkMacro.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="889.903" Width="638.754">
+        Title="TicketLink Ticketing Macro" Height="889.903" Width="638.754">
     <Window.DataContext>
         <viewmodels:MainWindowViewModel/>
     </Window.DataContext>
@@ -27,7 +27,7 @@
             <ComboBox SelectedValue="{Binding ScheduleID, Mode=OneWayToSource}" ItemsSource="{Binding ProductRoundList}" DisplayMemberPath="startTime" SelectedValuePath="scheduleId"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Margin="409,19,0,0"/>
             <TextBlock Text="Qty" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,52,0,0"/>
-            <TextBox Text="{Binding Qty}"
+            <TextBox Text="{Binding Qty, UpdateSourceTrigger=PropertyChanged}"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Width="94" Margin="81,52,0,0"/>
             <CheckBox IsChecked="{Binding AutoPopup, UpdateSourceTrigger=PropertyChanged, Mode=OneWayToSource}"
                 Content="Auto Popup" HorizontalAlignment="Left" VerticalAlignment="Top" Height="22" Margin="196,55,0,0" Width="84"/>
@@ -62,12 +62,18 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
+            <TextBlock Text="Target Grade : " HorizontalAlignment="Left" Margin="10,399,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
+            <ComboBox ItemsSource="{Binding GradeList}" SelectedValue="{Binding TargetGrade, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="name" SelectedValuePath="gradeId" 
+                SelectedIndex="0" Width="97" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="98,399,0,0"/>
+            <TextBlock Text="Target Block : " HorizontalAlignment="Left" Margin="236,399,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
+            <ComboBox ItemsSource="{Binding BlockList}" SelectedValue="{Binding TargetBlock, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="blockName" SelectedValuePath="blockId"
+                SelectedIndex="0" Width="97" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="320,399,0,0"/>
             <!--Result Part-->
-            <TextBlock Text="Result" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,418,0,0" Height="14" Width="78" FontWeight="Bold"/>
+            <TextBlock Text="Result" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,468,0,0" Height="14" Width="78" FontWeight="Bold"/>
             <Button Command="{Binding ClearButton}" Content="Clear"
-                    Width="70" Height="23" Margin="0,414,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                    Width="70" Height="23" Margin="0,464,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
             <DataGrid ItemsSource="{Binding RemainSeats}" AutoGenerateColumns="False"
-            HorizontalAlignment="Stretch" Margin="10,442,10,10" VerticalAlignment="Stretch">
+            HorizontalAlignment="Stretch" Margin="10,492,10,10" VerticalAlignment="Stretch">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Grade ID" Binding="{Binding gradeId}"/>
                     <DataGridTextColumn Header="Block ID" Binding="{Binding blockId}"/>
@@ -78,6 +84,7 @@
                 </DataGrid.Columns>
 
             </DataGrid>
+           
 
         </Grid>
     </DockPanel>
