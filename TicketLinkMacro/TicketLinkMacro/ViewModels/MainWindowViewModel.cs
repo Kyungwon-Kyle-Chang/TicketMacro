@@ -201,7 +201,7 @@ namespace TicketLinkMacro.ViewModels
             string[] delim = { "var initData = {};", "initData.globalLocale ="};
             string[] delim2 = { "initData." };
             string[] delim3 = { " = "};
-            char[] delim4 = { ' ', ';', '\n' };
+            char[] delim4 = { ' ', ';', '\n', '	' };
 
             string[] s1 = s.Split(delim, StringSplitOptions.None);
             if(s1.Length < 3)
@@ -391,16 +391,17 @@ namespace TicketLinkMacro.ViewModels
             PreOccupancy.Seat[] selectedSeats = new PreOccupancy.Seat[count];
             for(int i=0; i<count; i++)
             {
+                int offset = i;
                 selectedSeats[i] = new PreOccupancy.Seat();
-                selectedSeats[i].allotmentCode = remainSeatsInfo[i].allotmentCode;
-                selectedSeats[i].area = remainSeatsInfo[i].area;
-                selectedSeats[i].blockId = remainSeatsInfo[i].blockId != null ? int.Parse(remainSeatsInfo[i].blockId) : 0;
-                selectedSeats[i].logicalSeatId = uint.Parse(remainSeatsInfo[i].logicalSeatid);
-                selectedSeats[i].orderNum = int.Parse(remainSeatsInfo[i].orderNum);
-                selectedSeats[i].productGradeId = int.Parse(remainSeatsInfo[i].gradeId);
+                selectedSeats[i].allotmentCode = remainSeatsInfo[offset].allotmentCode;
+                selectedSeats[i].area = remainSeatsInfo[offset].area;
+                selectedSeats[i].blockId = remainSeatsInfo[offset].blockId != null ? int.Parse(remainSeatsInfo[offset].blockId) : 0;
+                selectedSeats[i].logicalSeatId = uint.Parse(remainSeatsInfo[offset].logicalSeatid);
+                selectedSeats[i].orderNum = int.Parse(remainSeatsInfo[offset].orderNum);
+                selectedSeats[i].productGradeId = int.Parse(remainSeatsInfo[offset].gradeId);
                 selectedSeats[i].productGradeName = data.gradeName;
-                selectedSeats[i].seatAttribute = remainSeatsInfo[i].mapInfo;
-                selectedSeats[i].sortSeatAttribute = remainSeatsInfo[i].sortMapInfo;
+                selectedSeats[i].seatAttribute = remainSeatsInfo[offset].mapInfo;
+                selectedSeats[i].sortSeatAttribute = remainSeatsInfo[offset].sortMapInfo;
             }
 
             PreOccupancy result = new PreOccupancy();
